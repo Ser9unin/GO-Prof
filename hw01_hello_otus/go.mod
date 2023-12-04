@@ -1,4 +1,4 @@
-module github.com/Ser9unin/GO-Prof/tree/hw01_hello_otus
+module github.com/Ser9unin/GO-Prof/hw01_hello_otus
 
 go 1.19
 
