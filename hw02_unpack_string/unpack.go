@@ -32,6 +32,7 @@ func Unpack(s string) (string, error) {
 				continue
 			case runeStr[i-1] == '\\' && runeStr[i-2] == '\\':
 				for n > 0 {
+					resultString += string(runeStr[i-1])
 					n--
 				}
 				continue
