@@ -2,6 +2,7 @@ package hw02unpackstring
 
 import (
 	"errors"
+	"strings"
 	"unicode"
 )
 
@@ -31,19 +32,13 @@ func Unpack(s string) (string, error) {
 				resultString = resultString[:len(resultString)-1]
 				continue
 			case runeStr[i-1] == '\\' && runeStr[i-2] == '\\':
-				for n > 0 {
-					resultString += string(runeStr[i-1])
-					n--
-				}
+				resultString += strings.Repeat(string(runeStr[i-1]), n)
 				continue
 			case runeStr[i-1] == '\\' && runeStr[i-2] != '\\':
 				resultString += string(simbol)
 				continue
 			default:
-				for n > 1 {
-					resultString += string(runeStr[i-1])
-					n--
-				}
+				resultString += strings.Repeat(string(runeStr[i-1]), n-1)
 				continue
 			}
 		}
