@@ -31,7 +31,6 @@ func TestUnpack(t *testing.T) {
 			require.Equal(t, tc.expected, result)
 		})
 	}
-
 }
 
 func TestUnpackInvalidString(t *testing.T) {
