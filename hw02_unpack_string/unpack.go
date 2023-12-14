@@ -25,11 +25,16 @@ func Unpack(s string) (string, error) {
 			return "", ErrInvalidString
 		}
 
+		if i == (len(runeStr)-1) && simbol == '\\' {
+			return "", ErrInvalidString
+		}
+
 		if unicode.IsDigit(simbol) {
 			n = int(simbol - '0')
 			switch {
 			case n == 0:
-				resultString = resultString[:len(resultString)-1]
+				strsimbol := string(runeStr[i-1])
+				resultString = resultString[:len(resultString)-len(strsimbol)]
 				continue
 			case runeStr[i-1] == '\\' && runeStr[i-2] == '\\':
 				resultString += strings.Repeat(string(runeStr[i-1]), n)
