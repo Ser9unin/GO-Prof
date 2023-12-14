@@ -17,19 +17,14 @@ func Unpack(s string) (string, error) {
 	)
 
 	for i, simbol := range runeStr {
-		if unicode.IsDigit(simbol) && i == 0 {
-			return "", ErrInvalidString
-		}
-
-		if unicode.IsDigit(simbol) && unicode.IsDigit(runeStr[i-1]) && runeStr[i-2] != '\\' {
-			return "", ErrInvalidString
-		}
-
-		if i == (len(runeStr)-1) && simbol == '\\' {
-			return "", ErrInvalidString
-		}
-
 		if unicode.IsDigit(simbol) {
+			switch {
+			case i == 0:
+				return "", ErrInvalidString
+			case unicode.IsDigit(runeStr[i-1]) && runeStr[i-2] != '\\':
+				return "", ErrInvalidString
+			}
+
 			n = int(simbol - '0')
 			switch {
 			case n == 0:
@@ -46,6 +41,10 @@ func Unpack(s string) (string, error) {
 				resultString += strings.Repeat(string(runeStr[i-1]), n-1)
 				continue
 			}
+		}
+
+		if i == (len(runeStr)-1) && simbol == '\\' {
+			return "", ErrInvalidString
 		}
 
 		if i == 0 || i > 0 && simbol != '\\' {
