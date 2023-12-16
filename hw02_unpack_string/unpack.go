@@ -11,31 +11,41 @@ var ErrInvalidString = errors.New("invalid string")
 func Unpack(s string) (string, error) {
 	// Place your code here.
 	runeStr := []rune(s)
+	runeStrLen := len(runeStr) - 1
+
 	var (
-		resultString string
-		n            int
+		resultString      string
+		n, backslashCount int
 	)
 
-	for i, simbol := range runeStr {
-		if unicode.IsDigit(simbol) {
-			switch {
-			case i == 0:
-				return "", ErrInvalidString
-			case unicode.IsDigit(runeStr[i-1]) && runeStr[i-2] != '\\':
-				return "", ErrInvalidString
-			}
+	for i, symbol := range runeStr {
+		switch {
+		case symbol == '\\' && i == runeStrLen:
+			return "", ErrInvalidString
+		case symbol == '\\':
+			backslashCount++
+		}
 
-			n = int(simbol - '0')
+		if unicode.IsDigit(symbol) {
+			n = int(symbol - '0')
 			switch {
+			case i == 0 || (unicode.IsDigit(runeStr[i-1]) && runeStr[i-2] != '\\'):
+				return "", ErrInvalidString
 			case n == 0:
-				strsimbol := string(runeStr[i-1])
-				resultString = resultString[:len(resultString)-len(strsimbol)]
+				symbolLen := len(string(runeStr[i-1]))
+				myStrLen := len(resultString)
+				resultString = resultString[:myStrLen-symbolLen]
 				continue
-			case runeStr[i-1] == '\\' && runeStr[i-2] == '\\':
-				resultString += strings.Repeat(string(runeStr[i-1]), n)
+			case backslashCount > 0 && backslashCount%2 == 0:
+				resultString += strings.Repeat(`\`, n)
+				backslashCount = 0
 				continue
-			case runeStr[i-1] == '\\' && runeStr[i-2] != '\\':
-				resultString += string(simbol)
+			case backslashCount%2 != 0:
+				if backslashCount > 1 {
+					resultString += `\`
+				}
+				resultString += string(symbol)
+				backslashCount = 0
 				continue
 			default:
 				resultString += strings.Repeat(string(runeStr[i-1]), n-1)
@@ -43,12 +53,8 @@ func Unpack(s string) (string, error) {
 			}
 		}
 
-		if i == (len(runeStr)-1) && simbol == '\\' {
-			return "", ErrInvalidString
-		}
-
-		if i == 0 || i > 0 && simbol != '\\' {
-			resultString += string(simbol)
+		if i == 0 || i > 0 && symbol != '\\' {
+			resultString += string(symbol)
 		}
 	}
 	return resultString, nil
