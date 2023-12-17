@@ -31,14 +31,11 @@ func Unpack(s string) (string, error) {
 			switch {
 			case i == 0 || (unicode.IsDigit(runeStr[i-1]) && runeStr[i-2] != '\\'):
 				return "", ErrInvalidString
+			case unicode.IsDigit(runeStr[i-1]) && backslashCount%2 == 0 && backslashCount > 0:
+				return "", ErrInvalidString
 			case backslashCount%2 == 0 && backslashCount > 0:
-				switch {
-				case unicode.IsDigit(runeStr[i-1]):
-					return "", ErrInvalidString
-				default:
-					resultString += strings.Repeat(`\`, n)
-					continue
-				}
+				resultString += strings.Repeat(`\`, n)
+				continue
 			case n == 0:
 				symbolLen := len(string(runeStr[i-1]))
 				myStrLen := len(resultString)
