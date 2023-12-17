@@ -34,7 +34,9 @@ func Unpack(s string) (string, error) {
 		if unicode.IsDigit(symbol) {
 			n = int(symbol - '0')
 			switch {
-			case i == 0 || (prevSymbolDigit && runeStr[i-2] != '\\'):
+			case i == 0:
+				return "", ErrInvalidString
+			case prevSymbolDigit && runeStr[i-2] != '\\':
 				return "", ErrInvalidString
 			case prevSymbolDigit && backslashCount%2 == 0 && backslashCount > 0:
 				return "", ErrInvalidString
@@ -42,9 +44,7 @@ func Unpack(s string) (string, error) {
 				resultString += strings.Repeat(`\`, n)
 				continue
 			case n == 0:
-				symbolLen := len(prevSymbolString)
-				myStrLen := len(resultString)
-				resultString = resultString[:myStrLen-symbolLen]
+				resultString = strings.TrimSuffix(resultString, prevSymbolString)
 				continue
 			case backslashCount%2 != 0:
 				if backslashCount > 1 {
