@@ -14,8 +14,9 @@ func Unpack(s string) (string, error) {
 	runeStrLen := len(runeStr) - 1
 
 	var (
-		resultString      string
-		n, backslashCount int
+		resultString, prevSymbolString string
+		n, backslashCount              int
+		prevSymbolDigit                bool
 	)
 
 	for i, symbol := range runeStr {
@@ -24,20 +25,24 @@ func Unpack(s string) (string, error) {
 			return "", ErrInvalidString
 		case symbol == '\\':
 			backslashCount++
+			fallthrough
+		case i > 0:
+			prevSymbolString = string(runeStr[i-1])
+			prevSymbolDigit = unicode.IsDigit(runeStr[i-1])
 		}
 
 		if unicode.IsDigit(symbol) {
 			n = int(symbol - '0')
 			switch {
-			case i == 0 || (unicode.IsDigit(runeStr[i-1]) && runeStr[i-2] != '\\'):
+			case i == 0 || (prevSymbolDigit && runeStr[i-2] != '\\'):
 				return "", ErrInvalidString
-			case unicode.IsDigit(runeStr[i-1]) && backslashCount%2 == 0 && backslashCount > 0:
+			case prevSymbolDigit && backslashCount%2 == 0 && backslashCount > 0:
 				return "", ErrInvalidString
 			case backslashCount%2 == 0 && backslashCount > 0:
 				resultString += strings.Repeat(`\`, n)
 				continue
 			case n == 0:
-				symbolLen := len(string(runeStr[i-1]))
+				symbolLen := len(prevSymbolString)
 				myStrLen := len(resultString)
 				resultString = resultString[:myStrLen-symbolLen]
 				continue
@@ -49,7 +54,7 @@ func Unpack(s string) (string, error) {
 				backslashCount = 0
 				continue
 			default:
-				resultString += strings.Repeat(string(runeStr[i-1]), n-1)
+				resultString += strings.Repeat(prevSymbolString, n-1)
 				continue
 			}
 		}
