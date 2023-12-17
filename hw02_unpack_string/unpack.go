@@ -59,7 +59,10 @@ func Unpack(s string) (string, error) {
 			}
 		}
 
-		if i == 0 || i > 0 && symbol != '\\' {
+		switch {
+		case i == 0:
+			resultString += string(symbol)
+		case i > 0 && symbol != '\\':
 			resultString += string(symbol)
 		}
 	}
