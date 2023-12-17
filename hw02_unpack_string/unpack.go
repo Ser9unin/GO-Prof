@@ -46,10 +46,11 @@ func Unpack(s string) (string, error) {
 			case n == 0:
 				resultString = strings.TrimSuffix(resultString, prevSymbolString)
 				continue
-			case backslashCount%2 != 0:
-				if backslashCount > 1 {
-					resultString += `\`
-				}
+			case backslashCount%2 != 0 && backslashCount > 1:
+				resultString += `\` + string(symbol)
+				backslashCount = 0
+				continue
+			case backslashCount%2 != 0 && backslashCount == 1:
 				resultString += string(symbol)
 				backslashCount = 0
 				continue
