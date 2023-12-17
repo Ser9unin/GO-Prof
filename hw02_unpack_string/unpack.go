@@ -42,28 +42,18 @@ func Unpack(s string) (string, error) {
 				return "", ErrInvalidString
 			case backslashCount%2 == 0 && backslashCount > 0:
 				resultString += strings.Repeat(`\`, n)
-				continue
 			case n == 0:
 				resultString = strings.TrimSuffix(resultString, prevSymbolString)
-				continue
-			case backslashCount%2 != 0 && backslashCount > 1:
-				resultString += `\` + string(symbol)
-				backslashCount = 0
-				continue
-			case backslashCount%2 != 0 && backslashCount == 1:
+			case backslashCount%2 != 0:
+				if backslashCount > 1 {
+					resultString += `\`
+				}
 				resultString += string(symbol)
 				backslashCount = 0
-				continue
 			default:
 				resultString += strings.Repeat(prevSymbolString, n-1)
-				continue
 			}
-		}
-
-		switch {
-		case i == 0:
-			resultString += string(symbol)
-		case i > 0 && symbol != '\\':
+		} else if symbol != '\\' {
 			resultString += string(symbol)
 		}
 	}
