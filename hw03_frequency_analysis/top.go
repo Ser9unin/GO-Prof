@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-var clearWordRegex = regexp.MustCompile(`([а-яА-Яa-zA-Z-]{2,}|[а-яА-Яa-zA-Z])`)
+var clearWordRegex = regexp.MustCompile(`(\w+[\.\,\!\?]*\w+)|[а-яА-Яa-zA-Z-]{2,}|[а-яА-Яa-zA-Z]`)
 
 func Top10(s string) []string {
 	// Place your code here.
