@@ -7,7 +7,7 @@ import (
 )
 
 // Change to true if needed.
-var taskWithAsteriskIsCompleted = false
+var taskWithAsteriskIsCompleted = true
 
 var text = `Как видите, он  спускается  по  лестнице  вслед  за  своим
 	другом   Кристофером   Робином,   головой   вниз,  пересчитывая
@@ -43,6 +43,10 @@ var text = `Как видите, он  спускается  по  лестни�
 	посидеть у огня и послушать какую-нибудь интересную сказку.
 		В этот вечер...`
 
+var dashes = `-- - --- ---- - ----- ------`
+
+var crazyAnymals = `little cat...dog contain cat and dog or dog and cat`
+
 func TestTop10(t *testing.T) {
 	t.Run("no words in empty string", func(t *testing.T) {
 		require.Len(t, Top10(""), 0)
@@ -77,6 +81,34 @@ func TestTop10(t *testing.T) {
 				"то",        // 4
 			}
 			require.Equal(t, expected, Top10(text))
+		}
+	})
+
+	t.Run("dashes test", func(t *testing.T) {
+		if taskWithAsteriskIsCompleted {
+			expected := []string{
+				"--",     // 1
+				"---",    // 1
+				"----",   // 1
+				"-----",  // 1
+				"------", // 1
+			}
+			require.Equal(t, expected, Top10(dashes))
+		}
+	})
+
+	t.Run("cat-dog", func(t *testing.T) {
+		if taskWithAsteriskIsCompleted {
+			expected := []string{
+				"and",       // 2
+				"cat",       // 2
+				"dog",       // 2
+				"cat...dog", // 1
+				"contain",   // 1
+				"little",    // 1
+				"or",        // 1
+			}
+			require.Equal(t, expected, Top10(crazyAnymals))
 		}
 	})
 }
