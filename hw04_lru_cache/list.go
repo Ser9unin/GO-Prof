@@ -73,14 +73,10 @@ func (l *list) PushBack(v interface{}) *ListItem {
 	}
 
 	exLastNode := l.LastNode
-
 	newItem.Prev = exLastNode
-
 	l.LastNode = newItem
 	exLastNode.Next = newItem
-
 	l.Size++
-
 	return newItem
 }
 
