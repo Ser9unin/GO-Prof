@@ -19,12 +19,12 @@ func Run(tasks []Task, n, m int) error {
 	)
 
 	tasksChan := make(chan Task)
-	errChan := make(chan error, m)
+	errChan := make(chan error)
 	doneChan := make(chan struct{})
 
 	for i := 0; i < n; i++ {
 		wg.Add(1)
-		go func() {
+		go func(tasksChan <-chan Task, errChan chan<- error, doneChan <-chan struct{}) {
 			for task := range tasksChan {
 				err := task()
 				select {
@@ -35,11 +35,11 @@ func Run(tasks []Task, n, m int) error {
 				}
 			}
 			wg.Done()
-		}()
+		}(tasksChan, errChan, doneChan)
 	}
 
 	wg.Add(1)
-	go func() {
+	go func(tasksChan chan<- Task, doneChan <-chan struct{}) {
 		defer close(tasksChan)
 		for _, task := range tasks {
 			select {
@@ -50,7 +50,7 @@ func Run(tasks []Task, n, m int) error {
 			}
 		}
 		wg.Done()
-	}()
+	}(tasksChan, doneChan)
 
 	for j := 0; j < len(tasks); j++ {
 		t, ok := <-errChan
@@ -65,9 +65,10 @@ func Run(tasks []Task, n, m int) error {
 			close(doneChan)
 			return err
 		}
+		if j == len(tasks)-1 {
+			close(errChan)
+		}
 	}
-
-	defer close(errChan)
 
 	wg.Wait()
 
