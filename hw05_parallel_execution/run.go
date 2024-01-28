@@ -67,6 +67,8 @@ func Run(tasks []Task, n, m int) error {
 		}
 	}
 
+	defer close(errChan)
+
 	wg.Wait()
 
 	return err
