@@ -1,5 +1,5 @@
-module github.com/fixme_my_friend/hw05_parallel_execution
-//Ser9unin/GO-Prof
+module github.com/Ser9unin/GO-Prof/hw05_parallel_execution
+
 go 1.19
 
 require (
