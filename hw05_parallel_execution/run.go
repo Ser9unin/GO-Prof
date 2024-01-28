@@ -25,8 +25,13 @@ func Run(tasks []Task, n, m int) error {
 	for i := 0; i < n; i++ {
 		wg.Add(1)
 		go func(tasksChan <-chan Task, errChan chan<- error, doneChan <-chan struct{}) {
-			for task := range tasksChan {
+			for {
+				task, ok := <-tasksChan
+				if !ok {
+					break
+				}
 				err := task()
+
 				select {
 				case errChan <- err:
 					fmt.Println("write ", err)
