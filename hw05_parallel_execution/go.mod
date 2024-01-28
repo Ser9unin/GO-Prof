@@ -1,4 +1,4 @@
-module github.com/fixme_my_friend/hw05_parallel_execution
+module github.com/Ser9unin/GO-Prof/hw05_parallel_execution
 
 go 1.19
 
@@ -14,4 +14,3 @@ require (
 	golang.org/x/tools v0.1.0 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 )
-//Ser9unin/GO-Prof
