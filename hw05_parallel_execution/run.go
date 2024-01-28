@@ -37,11 +37,10 @@ func Run(tasks []Task, n, m int) error {
 	}()
 
 	for i := 0; i < n; i++ {
-		i := i
 		wg.Add(1)
 		go func() {
 			for task := range tasksChan {
-				fmt.Println("worker", i, "read from taskChan")
+				//fmt.Println("worker", i, "read from taskChan")
 				err := task()
 				select {
 				case errChan <- err:
@@ -66,6 +65,9 @@ func Run(tasks []Task, n, m int) error {
 			err = ErrErrorsLimitExceeded
 			close(doneChan)
 			return err
+		}
+		if j == len(tasks)-1 && mCheck == 0 {
+			close(doneChan)
 		}
 	}
 
