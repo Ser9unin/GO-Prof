@@ -37,8 +37,9 @@ func Run(tasks []Task, n, m int) error {
 	}()
 
 	for i := 0; i < n; i++ {
+		i := i
 		wg.Add(1)
-		go func(i int) {
+		go func() {
 			for task := range tasksChan {
 				fmt.Println("worker", i, "read from taskChan")
 				err := task()
@@ -50,7 +51,7 @@ func Run(tasks []Task, n, m int) error {
 				}
 			}
 			wg.Done()
-		}(i)
+		}()
 	}
 
 	for j := 0; j < len(tasks); j++ {
@@ -68,6 +69,9 @@ func Run(tasks []Task, n, m int) error {
 		}
 	}
 
-	wg.Wait()
+	go func() {
+		defer close(errChan)
+		wg.Wait()
+	}()
 	return nil
 }
