@@ -40,7 +40,6 @@ func Run(tasks []Task, n, m int) error {
 		wg.Add(1)
 		go func() {
 			for task := range tasksChan {
-				//fmt.Println("worker", i, "read from taskChan")
 				err := task()
 				select {
 				case errChan <- err:
@@ -66,14 +65,9 @@ func Run(tasks []Task, n, m int) error {
 			close(doneChan)
 			return err
 		}
-		if j == len(tasks)-1 && mCheck == 0 {
-			close(doneChan)
-		}
 	}
 
-	go func() {
-		defer close(errChan)
-		wg.Wait()
-	}()
-	return nil
+	wg.Wait()
+
+	return err
 }
