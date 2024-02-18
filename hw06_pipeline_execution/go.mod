@@ -1,4 +1,4 @@
-module github.com/fixme_my_friend/hw06_pipeline_execution
+module github.com/Ser9unin/GO-Prof/hw06_pipeline_execution
 
 go 1.19
 
