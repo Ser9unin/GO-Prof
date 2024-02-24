@@ -24,13 +24,15 @@ func wrap(wrapCh In, done In) Out {
 	dataCh := make(Bi)
 
 	go func() {
-		defer close(dataCh)
+		defer func() {
+			close(dataCh)
+			for range wrapCh {
+				// read from "wrapCh" to avoid goroutine leak
+			}
+		}()
 		for {
 			select {
 			case <-done:
-				for range wrapCh {
-					// do nothing, read from "in" to prevent goroutine leak
-				}
 				return
 			case data, ok := <-wrapCh:
 				if !ok {
@@ -40,6 +42,5 @@ func wrap(wrapCh In, done In) Out {
 			}
 		}
 	}()
-
 	return dataCh
 }
