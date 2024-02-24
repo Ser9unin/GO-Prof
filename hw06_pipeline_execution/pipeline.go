@@ -1,7 +1,5 @@
 package hw06pipelineexecution
 
-import "fmt"
-
 type (
 	In  = <-chan interface{}
 	Out = In
@@ -12,31 +10,36 @@ type Stage func(in In) (out Out)
 
 func ExecutePipeline(in In, done In, stages ...Stage) Out {
 	// Place your code here.
-	out := in
+	wrapCh := in
 
 	for _, stage := range stages {
-		doneSig := wrap(out, done)
-		out = stage(doneSig)
+		doneSig := wrap(wrapCh, done)
+		wrapCh = stage(doneSig)
 	}
-	return out
+
+	return wrapCh
 }
 
-func wrap(in In, done In) Out {
-	out := make(Bi)
+func wrap(wrapCh In, done In) Out {
+	dataCh := make(Bi)
+
 	go func() {
-		defer close(out)
+		defer close(dataCh)
 		for {
 			select {
 			case <-done:
+				for range wrapCh {
+					// do nothing, read from "in" to prevent goroutine leak
+				}
 				return
-			case data, ok := <-in:
+			case data, ok := <-wrapCh:
 				if !ok {
 					return
 				}
-				fmt.Println(data)
-				out <- data
+				dataCh <- data
 			}
 		}
 	}()
-	return out
+
+	return dataCh
 }
