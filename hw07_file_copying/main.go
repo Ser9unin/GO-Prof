@@ -21,7 +21,7 @@ func main() {
 	flag.Parse()
 
 	// Place your code here.
-	err := Copy(from, to, limit, offset)
+	err := Copy(from, to, offset, limit)
 	if err != nil {
 		log.Println(err)
 	}
