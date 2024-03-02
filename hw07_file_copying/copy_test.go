@@ -74,6 +74,12 @@ func TestCopy(t *testing.T) {
 		_ = os.Remove("testdata/output.txt")
 	})
 
+	t.Run("copy offset bigger than filesize", func(t *testing.T) {
+		err := Copy("testdata/input.txt", "testdata/output.txt", 20000, 1000)
+
+		require.Error(t, err)
+	})
+
 	t.Run("copy offset 100 limit 100", func(t *testing.T) {
 		err := Copy("testdata/input.txt", "testdata/output.txt", 100, 100)
 		require.NoError(t, err)

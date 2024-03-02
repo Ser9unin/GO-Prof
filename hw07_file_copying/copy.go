@@ -45,7 +45,7 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 	switch {
 	case srcFileSize == 0:
 		return ErrUnknownOriginalFileSize
-	case offset > limit:
+	case offset > srcFileSize:
 		return ErrOffsetExceedsFileSize
 	case offset < 0:
 		return ErrOffsetNegative
