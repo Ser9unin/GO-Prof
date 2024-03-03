@@ -76,13 +76,15 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 		bar.Finish()
 	default:
 		var bufSize int64
-		bar := pb.Full.Start64(limit)
 
-		if offset+limit > srcFileSize {
+		switch {
+		case offset+limit >= srcFileSize:
 			bufSize = srcFileSize - offset
-		} else {
+		case offset+limit < srcFileSize:
 			bufSize = limit
 		}
+
+		bar := pb.Full.Start64(bufSize)
 
 		buf = make([]byte, bufSize)
 
