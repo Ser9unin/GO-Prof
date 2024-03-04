@@ -12,6 +12,7 @@ var (
 	ErrUnsupportedFile         = errors.New("unsupported file")
 	ErrOffsetExceedsFileSize   = errors.New("offset exceeds file size")
 	ErrOffsetNegative          = errors.New("offset has to be 0 or positive")
+	ErrLimitNegative           = errors.New("limit has to be 0 or positive")
 	ErrUnknownOriginalFileSize = errors.New("unknown original file size")
 	ErrOpenFile                = errors.New("file not found in this destination")
 	ErrCreateFile              = errors.New("can't create file")
@@ -49,11 +50,13 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 		return ErrOffsetExceedsFileSize
 	case offset < 0:
 		return ErrOffsetNegative
+	case limit < 0:
+		return ErrLimitNegative
 	}
 
 	newFile, ErrCreateFile = os.Create(toPath)
 
-	if err != nil {
+	if ErrCreateFile != nil {
 		if os.IsNotExist(ErrCreateFile) {
 			return ErrCreateFile
 		}
@@ -61,43 +64,27 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 
 	defer newFile.Close()
 
-	var buf []byte
+	limit = realLimit(offset, limit, srcFileSize)
 
-	switch {
-	case limit == 0 && offset == 0:
-		bar := pb.Full.Start64(srcFileSize)
-		// proxy reader
-		barReader := bar.NewProxyReader(srcFile)
+	bar := pb.Full.Start64(limit)
 
-		_, err = io.Copy(newFile, barReader)
-		if err != nil {
-			return err
-		}
-		bar.Finish()
-	default:
-		var bufSize int64
-
-		switch {
-		case offset+limit >= srcFileSize:
-			bufSize = srcFileSize - offset
-		case offset+limit < srcFileSize:
-			bufSize = limit
-		}
-
-		bar := pb.Full.Start64(bufSize)
-
-		buf = make([]byte, bufSize)
-
-		srcFile.ReadAt(buf, offset)
-
-		barWriter := bar.NewProxyWriter(newFile)
-		_, err = barWriter.Write(buf)
-
-		if err != nil {
-			return err
-		}
-		bar.Finish()
+	if _, err = srcFile.Seek(offset, io.SeekStart); err != nil {
+		return err
 	}
 
+	barReader := bar.NewProxyReader(srcFile)
+	if _, err = io.CopyN(newFile, barReader, limit); err != nil {
+		return err
+	}
+
+	bar.Finish()
+
 	return nil
+}
+
+func realLimit(offset, limit, srcFileSize int64) int64 {
+	if limit == 0 || offset+limit > srcFileSize {
+		return srcFileSize - offset
+	}
+	return limit
 }
