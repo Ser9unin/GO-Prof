@@ -33,10 +33,6 @@ func ReadDir(dir string) (Environment, error) {
 			continue
 		}
 
-		// if !file.Type().IsRegular() {
-		// 	continue
-		// }
-
 		fileInfo, err := file.Info()
 		if err != nil {
 			continue
@@ -71,7 +67,6 @@ func getValue(dir, fileName string) (string, error) {
 	defer f.Close()
 
 	readFile := bufio.NewScanner(f)
-	// если в файле пустая строка
 	if !readFile.Scan() {
 		return "", nil
 	}

@@ -9,7 +9,7 @@ import (
 // RunCmd runs a command + arguments (cmd) with environment variables from env.
 func RunCmd(cmd []string, env Environment) (returnCode int) {
 	// Place your code here.
-	// unset Environment variables and set new based on env containts
+
 	updEnvVarFromEnv(env)
 
 	//nolint:gosec
