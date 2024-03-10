@@ -12,6 +12,7 @@ func RunCmd(cmd []string, env Environment) (returnCode int) {
 	// unset Environment variables and set new based on env containts
 	updEnvVarFromEnv(env)
 
+	//nolint:gosec
 	command := exec.Command(cmd[0], cmd[1:]...)
 
 	command.Stdin = os.Stdin
@@ -19,7 +20,7 @@ func RunCmd(cmd []string, env Environment) (returnCode int) {
 	command.Stderr = os.Stderr
 
 	if err := command.Run(); err != nil {
-		log.Fatal(err)
+		return command.ProcessState.ExitCode()
 	}
 
 	return command.ProcessState.ExitCode()

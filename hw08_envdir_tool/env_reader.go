@@ -63,7 +63,7 @@ func ReadDir(dir string) (Environment, error) {
 }
 
 func getValue(dir, fileName string) (string, error) {
-	f, err := os.Open(filepath.Join(dir + fileName))
+	f, err := os.Open(filepath.Join(dir, fileName))
 	if err != nil {
 		return "", err
 	}

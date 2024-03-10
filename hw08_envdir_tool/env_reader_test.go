@@ -25,15 +25,15 @@ func TestReadDir(t *testing.T) {
 	})
 
 	t.Run("Check filename", func(t *testing.T) {
-		err := os.Mkdir("temp", 0777)
+		err := os.Mkdir("temp", 0o777)
 		require.NoError(t, err)
 		defer os.RemoveAll("temp/")
 
 		// File with "=" must be skipped
-		err = os.WriteFile(filepath.Join("temp/", "t=t"), []byte("bar"), 0777)
+		err = os.WriteFile(filepath.Join("temp/", "t=t"), []byte("bar"), 0o777)
 		require.NoError(t, err)
 		// File name in lower case
-		err = os.WriteFile(filepath.Join("temp/", "test"), []byte("test"), 0777)
+		err = os.WriteFile(filepath.Join("temp/", "test"), []byte("test"), 0o777)
 		require.NoError(t, err)
 		expectEnv := Environment{
 			"test": EnvValue{Value: "test", NeedRemove: false},
@@ -45,7 +45,7 @@ func TestReadDir(t *testing.T) {
 	})
 
 	t.Run("Check empty dir", func(t *testing.T) {
-		err := os.Mkdir("temp", 0777)
+		err := os.Mkdir("temp", 0o777)
 		require.NoError(t, err)
 		defer os.RemoveAll("temp/")
 
@@ -58,5 +58,4 @@ func TestReadDir(t *testing.T) {
 		_, err := ReadDir("some name")
 		require.Error(t, err)
 	})
-
 }
