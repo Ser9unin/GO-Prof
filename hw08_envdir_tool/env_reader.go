@@ -1,6 +1,12 @@
 package main
 
-import "os"
+import (
+	"bufio"
+	"os"
+	"path/filepath"
+	"strings"
+	"unicode"
+)
 
 type Environment map[string]EnvValue
 
@@ -14,9 +20,64 @@ type EnvValue struct {
 // Variables represented as files where filename is name of variable, file first line is a value.
 func ReadDir(dir string) (Environment, error) {
 	// Place your code here
-	if files, err := os.ReadDir(dir); err != nil {
+	files, err := os.ReadDir(dir)
+	if err != nil {
 		return nil, err
 	}
 
-	return nil, nil
+	environment := make(Environment, len(files))
+
+	for _, file := range files {
+		// If filename contain "=" skip file
+		if strings.Contains(file.Name(), "=") {
+			continue
+		}
+
+		// if !file.Type().IsRegular() {
+		// 	continue
+		// }
+
+		fileInfo, err := file.Info()
+		if err != nil {
+			continue
+		}
+
+		fileSize := fileInfo.Size()
+
+		// if file is empty set Needremove = true
+		if fileSize == 0 {
+			environment[file.Name()] = EnvValue{NeedRemove: true}
+			continue
+		}
+
+		// Get value from file contents
+		value, err := getValue(dir, file.Name())
+		if err != nil {
+			return nil, err
+		}
+
+		environment[file.Name()] = EnvValue{Value: value}
+	}
+
+	return environment, nil
+}
+
+func getValue(dir, fileName string) (string, error) {
+	f, err := os.Open(filepath.Join(dir + fileName))
+	if err != nil {
+		return "", err
+	}
+
+	defer f.Close()
+
+	readFile := bufio.NewScanner(f)
+	// если в файле пустая строка
+	if !readFile.Scan() {
+		return "", nil
+	}
+
+	readLine := readFile.Text()
+	readLine = strings.ReplaceAll(readLine, "\x00", "\n")
+	readLine = strings.TrimRightFunc(readLine, unicode.IsSpace)
+	return readLine, nil
 }
