@@ -17,6 +17,5 @@ func main() {
 	}
 
 	code := RunCmd(args[1:], env)
-
 	os.Exit(code)
 }
