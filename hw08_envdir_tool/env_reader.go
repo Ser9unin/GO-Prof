@@ -5,7 +5,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"unicode"
 )
 
 type Environment map[string]EnvValue
@@ -73,6 +72,7 @@ func getValue(dir, fileName string) (string, error) {
 
 	readLine := readFile.Text()
 	readLine = strings.ReplaceAll(readLine, "\x00", "\n")
-	readLine = strings.TrimRightFunc(readLine, unicode.IsSpace)
+	readLine = strings.TrimRight(readLine, " ")
+	readLine = strings.TrimRight(readLine, "\t")
 	return readLine, nil
 }
