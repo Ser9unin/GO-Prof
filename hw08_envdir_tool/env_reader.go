@@ -72,7 +72,6 @@ func getValue(dir, fileName string) (string, error) {
 
 	readLine := readFile.Text()
 	readLine = strings.ReplaceAll(readLine, "\x00", "\n")
-	readLine = strings.TrimRight(readLine, " ")
-	readLine = strings.TrimRight(readLine, "\t")
+	readLine = strings.TrimRight(readLine, " \t")
 	return readLine, nil
 }
