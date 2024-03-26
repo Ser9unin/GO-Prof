@@ -1,4 +1,4 @@
-module github.com/fixme_my_friend/hw09_struct_validator
+module github.com/Ser9unin/GO-Prof/hw09_struct_validator
 
 go 1.19
 
