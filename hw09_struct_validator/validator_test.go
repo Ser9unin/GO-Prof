@@ -13,13 +13,13 @@ type UserRole string
 // Test the function on different structures and other types.
 type (
 	User struct {
-		ID     string `json:"id" validate:"len:36"`
+		ID     string `json:"id" validate:"len:3"`
 		Name   string
-		Age    int             `validate:"min:18|max:50"`
-		Email  string          `validate:"regexp:^\\w+@\\w+\\.\\w+$"`
-		Role   UserRole        `validate:"in:admin,stuff"`
-		Phones []string        `validate:"len:11"`
-		meta   json.RawMessage //nolint:unused
+		Age    int      `validate:"min:18|max:50"`
+		Email  string   `validate:"regexp:^\\w+@\\w+\\.\\w+$"`
+		Role   UserRole `validate:"in:admin,stuff"`
+		Phones []string `validate:"len:11"`
+		meta   json.RawMessage
 	}
 
 	App struct {
@@ -28,6 +28,10 @@ type (
 
 	String struct {
 		Str string `validate:"in:admin,stuff"`
+	}
+
+	IntSlice struct {
+		IntS []int `validate:"min:18|max:50"`
 	}
 
 	Token struct {
@@ -43,7 +47,6 @@ type (
 )
 
 func TestValidate(t *testing.T) {
-	var valErrors ValidationErrors
 	tests := []struct {
 		in          interface{}
 		expectedErr error
@@ -53,12 +56,30 @@ func TestValidate(t *testing.T) {
 			expectedErr: ValidationErrors{ValidationError{Field: "Age", Err: ErrMin}},
 		},
 		{
-			in:          &User{ID: "1", Name: "Alex", Age: 18},
-			expectedErr: valErrors,
+			in: &User{
+				ID:     "123",
+				Name:   "Alex",
+				Age:    3,
+				Email:  "user@domen.com",
+				Role:   "admin",
+				Phones: []string{"7999123456", "+7888123456"},
+				meta:   nil,
+			},
+			expectedErr: ValidationErrors{
+				ValidationError{Field: "Age", Err: ErrMin},
+				ValidationError{Field: "Phones", Err: ErrLen},
+			},
 		},
 		{
-			in:          &User{ID: "123", Email: "mail@google"},
-			expectedErr: ValidationErrors{ValidationError{Field: "Email", Err: ErrRegexp}},
+			in:          &User{ID: "1", Name: "Alex", Age: 18},
+			expectedErr: ValidationErrors{ValidationError{Field: "ID", Err: ErrLen}},
+		},
+		{
+			in: &User{ID: "123", Email: "mail@google"},
+			expectedErr: ValidationErrors{
+				ValidationError{Field: "Age", Err: ErrMin},
+				ValidationError{Field: "Email", Err: ErrRegexp},
+			},
 		},
 		{
 			in:          &App{Version: "1.2.3.456"},
@@ -73,19 +94,21 @@ func TestValidate(t *testing.T) {
 			expectedErr: ValidationErrors{ValidationError{Field: "Str", Err: ErrIn}},
 		},
 		{
-			in:          &Token{Header: []byte{0, 1, 2}},
-			expectedErr: valErrors,
+			in: &IntSlice{IntS: []int{1, 18, 20, 50, 55}},
+			expectedErr: ValidationErrors{
+				ValidationError{Field: "IntS", Err: ErrMin},
+				ValidationError{Field: "IntS", Err: ErrMax},
+			},
 		},
 	}
 
-	for i, tt := range tests {
+	for i, testcase := range tests {
 		t.Run(fmt.Sprintf("case %d", i), func(t *testing.T) {
-			tt := tt
-			t.Parallel()
-			if err := Validate(tt.in); err != nil {
-				fmt.Println(err)
-				require.Equal(t, tt.expectedErr, err)
-			}
+			testcase := testcase
+			// t.Parallel()
+			err := Validate(testcase.in)
+			fmt.Println(testcase.expectedErr, " ", err)
+			require.Equal(t, testcase.expectedErr, err)
 		})
 	}
 }

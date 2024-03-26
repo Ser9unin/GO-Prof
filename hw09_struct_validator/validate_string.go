@@ -1,14 +1,16 @@
 package hw09structvalidator
 
 import (
+	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
 )
 
 func validateString(fieldName, fieldTag, fvString string) error {
+	fmt.Println("Check string")
 	var validateErr ValidationErrors
-
+	fmt.Println(fvString)
 	if fvString == "" {
 		return nil
 	}

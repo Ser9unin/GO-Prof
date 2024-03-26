@@ -1,13 +1,15 @@
 package hw09structvalidator
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 )
 
 func validateInt(fieldName, fieldTag string, fvInt int64) error {
+	fmt.Println("Check int")
 	var validateErr ValidationErrors
-
+	fmt.Println(fvInt)
 	s := strings.Split(fieldTag, "|")
 
 	for _, v := range s {
@@ -18,13 +20,15 @@ func validateInt(fieldName, fieldTag string, fvInt int64) error {
 
 		switch requirement[0] {
 		case "min":
-			if minRequirement, err := strconv.Atoi(requirement[1]); err != nil {
+			minRequirement, err := strconv.Atoi(requirement[1])
+			if err != nil {
 				return err
 			} else if fvInt < int64(minRequirement) {
 				validateErr = append(validateErr, ValidationError{fieldName, ErrMin})
 			}
 		case "max":
-			if maxRequirement, err := strconv.Atoi(requirement[1]); err != nil {
+			maxRequirement, err := strconv.Atoi(requirement[1])
+			if err != nil {
 				return err
 			} else if fvInt > int64(maxRequirement) {
 				validateErr = append(validateErr, ValidationError{fieldName, ErrMax})
@@ -41,5 +45,6 @@ func validateInt(fieldName, fieldTag string, fvInt int64) error {
 			validateErr = append(validateErr, ValidationError{fieldName, ErrInvalidRequirement})
 		}
 	}
+	fmt.Println(validateErr)
 	return validateErr
 }

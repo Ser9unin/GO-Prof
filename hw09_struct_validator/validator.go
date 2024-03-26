@@ -50,7 +50,6 @@ func Validate(v interface{}) error {
 	objType := objElem.Type()
 
 	for _, field := range reflect.VisibleFields(objType) {
-
 		fieldTag, ok := field.Tag.Lookup("validate")
 		if !ok {
 			continue
@@ -58,9 +57,11 @@ func Validate(v interface{}) error {
 
 		fieldName := field.Name
 		fieldVal := objElem.FieldByName(fieldName)
-		fieldType := field.Type
 
+		fieldType := field.Type
+		fmt.Println(fieldName, " ", fieldVal, " ", fieldType)
 		var err error
+		var v ValidationErrors
 
 		switch fieldType.Kind() {
 		case reflect.String:
@@ -69,25 +70,30 @@ func Validate(v interface{}) error {
 		case reflect.Int:
 			fvInt := fieldVal.Int()
 			err = validateInt(fieldName, fieldTag, fvInt)
-		case reflect.Array:
+		case reflect.Slice:
+			fmt.Println("Check slice")
 			if fieldType.Elem().String() == "int" {
-				for i := 0; i < fieldVal.NumField(); i++ {
-					fvInt := fieldVal.Field(i).Int()
-					err = validateInt(fieldName, fieldTag, fvInt)
+				for i := 0; i < fieldVal.Len(); i++ {
+					fvInt := fieldVal.Index(i).Int()
+					sliceErr := validateInt(fieldName, fieldTag, fvInt)
+					errors.As(sliceErr, &v)
+					valErrors = append(valErrors, v...)
 				}
+				continue
 			}
 			if fieldType.Elem().String() == "string" {
-				for i := 0; i < fieldVal.NumField(); i++ {
-					fvString := fieldVal.Field(i).String()
-					err = validateString(fieldName, fieldTag, fvString)
+				for i := 0; i < fieldVal.Len(); i++ {
+					fvString := fieldVal.Index(i).String()
+					sliceErr := validateString(fieldName, fieldTag, fvString)
+					errors.As(sliceErr, &v)
+					valErrors = append(valErrors, v...)
 				}
+				continue
 			}
+		default:
 		}
 
-		var v ValidationErrors
-		if !errors.As(err, &v) {
-			return err
-		}
+		errors.As(err, &v)
 		valErrors = append(valErrors, v...)
 	}
 
